@@ -12,25 +12,53 @@ class CallCollection:
         self.calls.append(call)
     def calls_list(self):
         return [x for x in self.calls if isinstance(x, callrecord.CallRecord)]
+    def calls_in_list(self):
+        return [x for x in self.calls_list() if x.direction == 'IN']
+    def calls_out_list(self):
+        return [x for x in self.calls_list() if x.direction == 'OUT']
     def sms_list(self):
         return [x for x in self.calls if isinstance(x, callrecord.SMSRecord)]
+    def sms_in_list(self):
+        return [x for x in self.sms_list() if x.direction == 'IN']
+    def sms_out_list(self):
+        return [x for x in self.sms_list() if x.direction == 'OUT']
     def internet_list(self):
         return [x for x in self.calls if isinstance(x, callrecord.InternetRecord)]
     def printstat(self):
+        print('='*40)
         print('Total calls: {0}'.format(len(self.calls)))
-        callin  = len([x for x in self.calls_list() if x.direction == 'IN'])
-        callout = len([x for x in self.calls_list() if x.direction == 'OUT'])
-        smsin   = len([x for x in self.sms_list() if x.direction == 'IN'])
-        smsout  = len([x for x in self.sms_list() if x.direction == 'OUT'])
+        callin  = len(self.calls_in_list())
+        callout = len(self.calls_out_list())
+        smsin   = len(self.sms_in_list())
+        smsout  = len(self.sms_out_list())
         print('      Calls: {0} (IN {1}, OUT {2})'.format(callin+callout, callin, callout))
         print('        SMS: {0} (IN {1}, OUT {2})'.format(smsin+smsout, smsin, smsout))
-        print('   Internet: {0}'.format(len([x for x in self.internet_list()])))
+        print('   Internet: {0}'.format(len(self.internet_list())))
+        print('-'*40)
         
-        calldurin = sum([int(x.volume.total_seconds()) for x in self.calls_list() if x.direction == 'IN'])
-        calldurout = sum([int(x.volume.total_seconds()) for x in self.calls_list() if x.direction == 'OUT'])
+        calldurin = sum([int(x.volume.total_seconds()) for x in self.calls_in_list()])
+        calldurout = sum([int(x.volume.total_seconds()) for x in self.calls_out_list()])
+        mindurin = min([int(x.volume.total_seconds()) for x in self.calls_in_list()])
+        mindurout = min([int(x.volume.total_seconds()) for x in self.calls_out_list()])
+        avgdurin = int(calldurin / float(callin))
+        avgdurout = int(calldurout / float(callout))
+        maxdurin = max([int(x.volume.total_seconds()) for x in self.calls_in_list()])
+        maxdurout = max([int(x.volume.total_seconds()) for x in self.calls_out_list()])
         durin, durout = timedelta(seconds=calldurin), timedelta(seconds=calldurout)
         print('Call duration: {0} (IN {1}, OUT {2})'.format(durin+durout, durin, durout))
-        print('Internet volume: {0}'.format(sum([x.volume for x in self.internet_list()])))
+        print('Call IN  min/avg/max: {0}/{1}/{2}'.format(timedelta(seconds=mindurin), timedelta(seconds=avgdurin), timedelta(seconds=maxdurin)))
+        for x in set([q.type for q in self.calls_in_list()]):
+            cnt = len([a for a in self.calls_in_list() if a.type == x])
+            dur = sum([int(a.volume.total_seconds()) for a in self.calls_in_list() if a.type == x])
+            print('{0:8} {1:>4}: {2:>2} itm on {3}s'.format(' ', x, cnt, timedelta(seconds=dur)))
+        print('Call OUT min/avg/max: {0}/{1}/{2}'.format(timedelta(seconds=mindurout), timedelta(seconds=avgdurout), timedelta(seconds=maxdurout)))
+        for x in set([q.type for q in self.calls_out_list()]):
+            cnt = len([a for a in self.calls_out_list() if a.type == x])
+            dur = sum([int(a.volume.total_seconds()) for a in self.calls_out_list() if a.type == x])
+            print('{0:8} {1:>4}: {2:>2} itm on {3}s'.format(' ', x, cnt, timedelta(seconds=dur)))
+        print('-'*40)
+        print('Internet volume: {0}KB'.format(sum([x.volume for x in self.internet_list()])))
+        print('='*40)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Great Description To Be Here')

@@ -7,9 +7,21 @@ class Record:
     def __init__(self, calldate, number, direction, region, type, realprice):
         self.calldate = datetime.strptime(calldate, '%d.%m.%y %H:%M:%S')
         self.number = number
-        self.direction = {'Входящий': 'IN', 'Исходящий': 'OUT', 'Передача данных':'DAT', 'Переадресация на номер 9273590000':'RDR'}[direction]
+        self.direction = {'Входящий': 'IN',
+                          'Исходящий': 'OUT',
+                          'Передача данных':'DAT',
+                          'Переадресация на номер 9273590000':'RDR'}[direction]# .get(direction, direction)
         self.region = {'Республика Башкортостан':'RB', '':'-'}[region]
-        self.type = {'SMS':'SMS', 'SMS-премиум':'SMS', 'Внутрисетевой вызов':'INTRN', 'Вызов':'CALL', 'Междугородний/международный':'EXT', 'Междугородний/международный (Россия, Москва)':'EXT', 'Голосовая почта':'MAIL', 'GPRS(Internet) Город':'GPRS', 'Местный (Россия, Уфа)':'BASH', 'Вызов ОАО МегаФон':'MEGA'}[type]
+        self.type = {'SMS':'SMS',
+                     'SMS-премиум':'SMS',
+                     'Внутрисетевой вызов':'INT',
+                     'Вызов':'CALL',
+                     'Междугородний/международный':'EXT',
+                     'Междугородний/международный (Россия, Москва)':'EXT',
+                     'Голосовая почта':'MAIL',
+                     'GPRS(Internet) Город':'GPRS',
+                     'Местный (Россия, Уфа)':'BASH',
+                     'Вызов ОАО МегаФон':'MEGA'}[type]
         self.realprice = realprice
     def __str__(self):
         return '{0} {1:3} {2:2}'.format(self.calldate.strftime('%Y.%m.%d %H:%M:%S'), self.direction, self.region)
